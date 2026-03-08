@@ -14,6 +14,7 @@ html_template = """
 </form>
 {% if name %}
     <p>Hello! Nice to meet you {{ name }}! Welcome to my Docker container!</p>
+    <p>Automation is working now!</p>
 {% endif %}
 </body>
 </html>
