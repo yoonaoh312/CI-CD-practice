@@ -3,13 +3,18 @@ pipeline {
     stages {
         stage('Build Docker image') {
             steps {
-                powershell 'docker build -t greeting-app .'
+                // Use sh instead of powershell
+                sh 'docker build -t greeting-app .'
             }
         }
         stage('Run Docker container') {
             steps {
-                powershell 'docker stop greeting-app -ErrorAction SilentlyContinue; docker rm greeting-app -ErrorAction SilentlyContinue'
-                powershell 'docker run -d -p 5000:5000 --name greeting-app greeting-app'
+                // Stop and remove existing container if it exists
+                sh 'docker stop greeting-app || true'
+                sh 'docker rm greeting-app || true'
+
+                // Run the new container
+                sh 'docker run -d -p 5000:5000 --name greeting-app greeting-app'
             }
         }
     }
