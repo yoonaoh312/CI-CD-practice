@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        CONTAINER_NAME = 'greeting-app'
+        CONTAINER_NAME = "greeting-app"
     }
     stages {
         stage('Build Docker image') {
@@ -11,12 +11,13 @@ pipeline {
         }
         stage('Run Docker container') {
             steps {
-                // Stop and remove existing container if it exists
-                sh 'docker stop $CONTAINER_NAME || true'
-                sh 'docker rm $CONTAINER_NAME || true'
-
-                // Run the new container
-                sh 'docker run -d -p 5000:5000 --name $CONTAINER_NAME greeting-app'
+                sh '''
+                if [ $(docker ps -a -q -f "name=$CONTAINER_NAME") ]; then
+                    docker stop $CONTAINER_NAME
+                    docker rm $CONTAINER_NAME
+                fi
+                docker run -d -p 5000:5000 --name $CONTAINER_NAME greeting-app
+                '''
             }
         }
     }
