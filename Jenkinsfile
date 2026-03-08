@@ -1,42 +1,16 @@
 pipeline {
     agent any
-    environment {
-        IMAGE_NAME = "greeting-app"
-        CONTAINER_NAME = "greeting-app"
-    }
     stages {
-        stage('Checkout') {
+        stage('Build Docker image') {
             steps {
-                checkout scm
+                powershell 'docker build -t greeting-app .'
             }
         }
-        stage('Stop & Remove Existing Container') {
+        stage('Run Docker container') {
             steps {
-                sh '''
-                if [ $(docker ps -a -q -f "name=$CONTAINER_NAME") ]; then
-                    docker stop $CONTAINER_NAME
-                    docker rm $CONTAINER_NAME
-                fi
-                '''
+                powershell 'docker stop greeting-app -ErrorAction SilentlyContinue; docker rm greeting-app -ErrorAction SilentlyContinue'
+                powershell 'docker run -d -p 5000:5000 --name greeting-app greeting-app'
             }
-        }
-        stage('Build Docker Image') {
-            steps {
-                sh "docker build -t $IMAGE_NAME ."
-            }
-        }
-        stage('Run Docker Container') {
-            steps {
-                sh "docker run -d -p 5000:5000 --name $CONTAINER_NAME $IMAGE_NAME"
-            }
-        }
-    }
-    post {
-        success {
-            echo "✅ Docker container $CONTAINER_NAME is running successfully!"
-        }
-        failure {
-            echo "❌ Build failed! Check the console output."
         }
     }
 }
