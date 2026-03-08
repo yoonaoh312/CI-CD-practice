@@ -15,31 +15,31 @@ pipeline {
 
         stage('Stop & Remove Existing Container') {
             steps {
-                powershell """
-                if (\$(docker ps -a -q -f "name=\$env:CONTAINER_NAME")) {
-                    docker stop \$env:CONTAINER_NAME
-                    docker rm \$env:CONTAINER_NAME
-                }
-                """
+                sh '''
+                if [ $(docker ps -a -q -f "name=$CONTAINER_NAME") ]; then
+                    docker stop $CONTAINER_NAME
+                    docker rm $CONTAINER_NAME
+                fi
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                powershell "docker build -t \$env:IMAGE_NAME ."
+                sh "docker build -t $IMAGE_NAME ."
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                powershell "docker run -d -p 5000:5000 --name \$env:CONTAINER_NAME \$env:IMAGE_NAME"
+                sh "docker run -d -p 5000:5000 --name $CONTAINER_NAME $IMAGE_NAME"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Docker container \$env:CONTAINER_NAME is running successfully!"
+            echo "✅ Docker container $CONTAINER_NAME is running successfully!"
         }
         failure {
             echo "❌ Build failed! Check the console output."
